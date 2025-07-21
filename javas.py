@@ -431,14 +431,22 @@ class JavasChat(BoxLayout):
         import time
         import threading
         def animate_thinking():
-            for _ in range(60*10):
-                Clock.schedule_once(lambda dt: self.face_widget.animate(thinking=True), 0)
-                time.sleep(0.1)
-            Clock.schedule_once(lambda dt: self.face_widget.animate(thinking=False), 0)
+            try:
+                for _ in range(60*10):
+                    Clock.schedule_once(lambda dt: self.face_widget.animate(thinking=True), 0)
+                    time.sleep(0.1)
+                Clock.schedule_once(lambda dt: self.face_widget.animate(thinking=False), 0)
+            except Exception:
+                import sys
+                sys.excepthook(*sys.exc_info())
         threading.Thread(target=animate_thinking, daemon=True).start()
         def delayed_response():
-            time.sleep(60)
-            self._get_llm_response(user_text)
+            try:
+                time.sleep(60)
+                self._get_llm_response(user_text)
+            except Exception:
+                import sys
+                sys.excepthook(*sys.exc_info())
         threading.Thread(target=delayed_response).start()
 
     def append_message(self, msg, color="[color=FFFFFF]"):
@@ -556,22 +564,26 @@ class JavasChat(BoxLayout):
         import time
         emotion = getattr(self, 'current_emotion', 'neutral')
         def animate_speaking():
-            for _ in range(20):
-                if emotion == 'happy':
-                    self.face_widget.eye_offset = 2
-                    self.face_widget.mouth_open = 10
-                elif emotion == 'sad':
-                    self.face_widget.eye_offset = -2
-                    self.face_widget.mouth_open = 2
-                else:
-                    self.face_widget.eye_offset = 0
-                    self.face_widget.mouth_open = 5
+            try:
+                for _ in range(20):
+                    if emotion == 'happy':
+                        self.face_widget.eye_offset = 2
+                        self.face_widget.mouth_open = 10
+                    elif emotion == 'sad':
+                        self.face_widget.eye_offset = -2
+                        self.face_widget.mouth_open = 2
+                    else:
+                        self.face_widget.eye_offset = 0
+                        self.face_widget.mouth_open = 5
+                    Clock.schedule_once(lambda dt: self.face_widget.update_face(), 0)
+                    time.sleep(0.08)
+                # Reset to neutral
+                self.face_widget.eye_offset = 0
+                self.face_widget.mouth_open = 0
                 Clock.schedule_once(lambda dt: self.face_widget.update_face(), 0)
-                time.sleep(0.08)
-            # Reset to neutral
-            self.face_widget.eye_offset = 0
-            self.face_widget.mouth_open = 0
-            Clock.schedule_once(lambda dt: self.face_widget.update_face(), 0)
+            except Exception:
+                import sys
+                sys.excepthook(*sys.exc_info())
         threading.Thread(target=animate_speaking, daemon=True).start()
         # Adjust TTS pitch/rate for emotion
         try:
